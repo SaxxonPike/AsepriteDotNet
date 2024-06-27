@@ -5,8 +5,10 @@
 using System.Buffers.Binary;
 using System.IO.Compression;
 using System.Net.NetworkInformation;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
+using AsepriteDotNet.Common;
 using AsepriteDotNet.Compression;
 
 /// <summary>
@@ -195,6 +197,54 @@ internal sealed class AsepriteBinaryReader : IDisposable
     }
 
     /// <summary>
+    /// Reads a 8-byte unsigned integer from the underlying stream and advances the stream by eight bytes.
+    /// </summary>
+    /// <returns>The 8-byte unsigned integer read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public ulong ReadQword()
+    {
+        ValidateDisposed(_isDisposed);
+
+        Span<byte> buffer = stackalloc byte[sizeof(ulong)];
+#if NET6_0
+        ReadExactly(_stream, buffer);
+#elif NET8_0_OR_GREATER
+        _stream.ReadExactly(buffer);
+#endif
+        return BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+    }
+
+    /// <summary>
+    /// Reads a 4-byte signed integer from the underlying stream and advances the stream by four bytes.
+    /// </summary>
+    /// <returns>The 4-byte signed integer read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public long ReadLong64()
+    {
+        ValidateDisposed(_isDisposed);
+
+        Span<byte> buffer = stackalloc byte[sizeof(long)];
+#if NET6_0
+        ReadExactly(_stream, buffer);
+#elif NET8_0_OR_GREATER
+        _stream.ReadExactly(buffer);
+#endif
+        return BinaryPrimitives.ReadInt64LittleEndian(buffer);
+    }
+
+    /// <summary>
     /// Reads a 4-byte fixed-point (16:16) value from the underlying stream and advances the stream by four bytes.
     /// </summary>
     /// <returns>The 4-byte floating point representation of the value read from the underlying stream.</returns>
@@ -240,6 +290,92 @@ internal sealed class AsepriteBinaryReader : IDisposable
         _stream.ReadExactly(buffer);
 #endif
         return BinaryPrimitives.ReadSingleLittleEndian(buffer);
+    }
+
+    /// <summary>
+    /// Reads an 8-byte floating point value from the underlying stream and advances the stream by eight bytes.
+    /// </summary>
+    /// <returns>The 8-byte floating point value read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public double ReadDouble()
+    {
+        ValidateDisposed(_isDisposed);
+
+        Span<byte> buffer = stackalloc byte[sizeof(double)];
+#if NET6_0
+        ReadExactly(_stream, buffer);
+#elif NET8_0_OR_GREATER
+        _stream.ReadExactly(buffer);
+#endif
+        return BinaryPrimitives.ReadDoubleLittleEndian(buffer);
+    }
+
+    /// <summary>
+    /// Reads a 2D point from the underlying stream and advances the stream by eight bytes.
+    /// </summary>
+    /// <returns>The X/Y pair read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public Point ReadPoint()
+    {
+        ValidateDisposed(_isDisposed);
+
+        var x = ReadLong();
+        var y = ReadLong();
+        return new Point(x, y);
+    }
+
+    /// <summary>
+    /// Reads a 2D rectangle from the underlying stream and advances the stream by sixteen bytes.
+    /// </summary>
+    /// <returns>The 2D rectangle read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public Rectangle ReadRect()
+    {
+        ValidateDisposed(_isDisposed);
+
+        var x = ReadLong();
+        var y = ReadLong();
+        var width = ReadLong();
+        var height = ReadLong();
+        return new Rectangle(x, y, width, height);
+    }
+
+    /// <summary>
+    /// Reads a 2D size from the underlying stream and advances the stream by eight bytes.
+    /// </summary>
+    /// <returns>The 2D size read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public Size ReadSize()
+    {
+        ValidateDisposed(_isDisposed);
+
+        var width = ReadLong();
+        var height = ReadLong();
+        return new Size(width, height);
     }
 
     /// <summary>

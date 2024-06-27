@@ -55,6 +55,90 @@ public static partial class AsepriteFileLoader
         return LoadFile(fileName, reader, preMultiplyAlpha);
     }
 
+    private static object? ReadUserDataPropertyValue(AsepriteBinaryReader reader, ushort type)
+    {
+        switch (type)
+        {
+            case ASE_USER_DATA_PROPERTY_TYPE_BOOL:
+                return reader.ReadByte() != 0;
+            case ASE_USER_DATA_PROPERTY_TYPE_INT8:
+                return unchecked((sbyte)reader.ReadByte());
+            case ASE_USER_DATA_PROPERTY_TYPE_UINT8:
+                return reader.ReadByte();
+            case ASE_USER_DATA_PROPERTY_TYPE_INT16:
+                return reader.ReadShort();
+            case ASE_USER_DATA_PROPERTY_TYPE_UINT16:
+                return reader.ReadWord();
+            case ASE_USER_DATA_PROPERTY_TYPE_INT32:
+                return reader.ReadLong();
+            case ASE_USER_DATA_PROPERTY_TYPE_UINT32:
+                return reader.ReadDword();
+            case ASE_USER_DATA_PROPERTY_TYPE_INT64:
+                return reader.ReadLong64();
+            case ASE_USER_DATA_PROPERTY_TYPE_UINT64:
+                return reader.ReadQword();
+            case ASE_USER_DATA_PROPERTY_TYPE_FIXED:
+                return reader.ReadFixed();
+            case ASE_USER_DATA_PROPERTY_TYPE_FLOAT:
+                return reader.ReadFloat();
+            case ASE_USER_DATA_PROPERTY_TYPE_DOUBLE:
+                return reader.ReadDouble();
+            case ASE_USER_DATA_PROPERTY_TYPE_STRING:
+                return reader.ReadString();
+            case ASE_USER_DATA_PROPERTY_TYPE_POINT:
+                return reader.ReadPoint();
+            case ASE_USER_DATA_PROPERTY_TYPE_SIZE:
+                return reader.ReadSize();
+            case ASE_USER_DATA_PROPERTY_TYPE_RECT:
+                return reader.ReadRect();
+            case ASE_USER_DATA_PROPERTY_TYPE_VECTOR:
+                {
+                    var vectorLength = reader.ReadDword();
+                    var vectorType = reader.ReadWord();
+                    var vectorValue = new object?[vectorLength];
+
+                    for (var i = 0; i < vectorLength; i++)
+                    {
+                        var vectorElementType = vectorType == 0
+                            ? reader.ReadWord()
+                            : vectorType;
+
+                        vectorValue[i] = ReadUserDataPropertyValue(reader, vectorElementType);
+                    }
+
+                    return vectorValue;
+                }
+            case ASE_USER_DATA_PROPERTY_TYPE_PROPERTIES:
+                return ReadUserDataPropertyMap(reader, 0);
+            case ASE_USER_DATA_PROPERTY_TYPE_UUID:
+                return new Guid(reader.ReadBytes(16));
+            default:
+                return null;
+        }
+    }
+
+    private static AsepriteUserDataPropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader, uint key)
+    {
+        var properties = new List<AsepriteUserDataProperty>();
+        var count = (int)reader.ReadDword();
+
+        for (var i = 0; i < count; i++)
+        {
+            var name = reader.ReadString();
+            var type = reader.ReadWord();
+            var value = ReadUserDataPropertyValue(reader, type);
+            properties.Add(new AsepriteUserDataProperty(name, value));
+        }
+
+        return new AsepriteUserDataPropertyMap(key, properties.ToArray());
+    }
+
+    private static AsepriteUserDataPropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader)
+    {
+        var key = reader.ReadDword();
+        return ReadUserDataPropertyMap(reader, key);
+    }
+
     /// <summary>
     /// Reads only the tag data from the Aseprite file.
     /// </summary>
@@ -160,6 +244,7 @@ public static partial class AsepriteFileLoader
                         uint flags = reader.ReadDword();
                         string? text = null;
                         Rgba32? color = null;
+                        AsepriteUserDataPropertyMap[] propertyMaps = Array.Empty<AsepriteUserDataPropertyMap>();
 
                         if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_TEXT))
                         {
@@ -171,10 +256,25 @@ public static partial class AsepriteFileLoader
                             color = reader.ReadUnsafe<Rgba32>(Rgba32.StructSize);
                         }
 
+                        if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_PROPERTIES))
+                        {
+                            // Total number of bytes in the property map data (skipped.)
+                            reader.ReadDword();
+
+                            var propertyMapCount = (int)reader.ReadDword();
+                            propertyMaps = new AsepriteUserDataPropertyMap[propertyMapCount];
+
+                            for (var j = 0; j < propertyMapCount; j++)
+                            {
+                                propertyMaps[j] = ReadUserDataPropertyMap(reader);
+                            }
+                        }
+
                         if (currentUserData is not null)
                         {
                             currentUserData.Text = text;
                             currentUserData.Color = color;
+                            currentUserData.SetPropertyMaps(propertyMaps);
 
                             if (lastReadChunkType == ASE_CHUNK_TAGS)
                             {
@@ -492,6 +592,7 @@ public static partial class AsepriteFileLoader
                             uint flags = reader.ReadDword();
                             string? text = null;
                             Rgba32? color = null;
+                            AsepriteUserDataPropertyMap[] propertyMaps = Array.Empty<AsepriteUserDataPropertyMap>();
 
                             if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_TEXT))
                             {
@@ -503,15 +604,31 @@ public static partial class AsepriteFileLoader
                                 color = reader.ReadUnsafe<Rgba32>(Rgba32.StructSize);
                             }
 
+                            if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_PROPERTIES))
+                            {
+                                // Total number of bytes in the property map data (skipped.)
+                                reader.ReadDword();
+
+                                var propertyMapCount = (int)reader.ReadDword();
+                                propertyMaps = new AsepriteUserDataPropertyMap[propertyMapCount];
+
+                                for (var j = 0; j < propertyMapCount; j++)
+                                {
+                                    propertyMaps[j] = ReadUserDataPropertyMap(reader);
+                                }
+                            }
+
                             if (currentUserData is null && paletteRead)
                             {
                                 spriteUserData.Text = text;
                                 spriteUserData.Color = color;
+                                spriteUserData.SetPropertyMaps(propertyMaps);
                             }
                             else if (currentUserData is not null)
                             {
                                 currentUserData.Text = text;
                                 currentUserData.Color = color;
+                                currentUserData.SetPropertyMaps(propertyMaps);
 
                                 if (lastReadChunkType == ASE_CHUNK_TAGS)
                                 {

@@ -52,6 +52,28 @@ public static partial class AsepriteFileLoader
 
     private const uint ASE_USER_DATA_FLAG_HAS_TEXT = 1;
     private const uint ASE_USER_DATA_FLAG_HAS_COLOR = 2;
+    private const uint ASE_USER_DATA_FLAG_HAS_PROPERTIES = 4;
+
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_NULLPTR = 0;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_BOOL = 1;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_INT8 = 2;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_UINT8 = 3;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_INT16 = 4;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_UINT16 = 5;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_INT32 = 6;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_UINT32 = 7;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_INT64 = 8;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_UINT64 = 9;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_FIXED = 10;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_FLOAT = 11;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_DOUBLE = 12;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_STRING = 13;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_POINT = 14;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_SIZE = 15;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_RECT = 16;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_VECTOR = 17;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_PROPERTIES = 18;
+    private const ushort ASE_USER_DATA_PROPERTY_TYPE_UUID = 19;
 
     private const uint ASE_SLICE_FLAGS_IS_NINE_PATCH = 1;
     private const uint ASE_SLICE_FLAGS_HAS_PIVOT = 2;
