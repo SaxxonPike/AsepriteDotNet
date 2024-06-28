@@ -457,5 +457,33 @@ namespace AsepriteDotNet.Tests.IO
             Assert.Equal(expected.Bounds.Width, actual.Bounds.Width);
             Assert.Equal(expected.Bounds.Height, actual.Bounds.Height);
         }
+
+        // While not directly editable, Lua addons for Aseprite can use the `spr.properties`
+        // field to set these extensible property sets.
+        [Fact]
+        public void AsepriteFileReader_UserDataPropertiesTest()
+        {
+            string path = GetPath("tag-data-test.aseprite");
+            AsepriteFile aseFile = AsepriteFileLoader.FromFile(path);
+            AsepriteUserDataPropertyMap actual = aseFile.UserData.PropertyMaps[0];
+
+            Assert.Equal("a", actual.Properties[0].Key);
+            Assert.Equal(true, actual.Properties[0].Value);
+
+            Assert.Equal("b", actual.Properties[1].Key);
+            Assert.Equal((sbyte)1, actual.Properties[1].Value);
+
+            Assert.Equal("c", actual.Properties[2].Key);
+            Assert.Equal("hi", actual.Properties[2].Value);
+
+            Assert.Equal("d", actual.Properties[3].Key);
+            Assert.Equal(2.3d, actual.Properties[3].Value);
+
+            Assert.Equal("m", actual.Properties[4].Key);
+
+            Assert.Equal("u", actual.Properties[5].Key);
+
+            Assert.Equal("v", actual.Properties[6].Key);
+        }
     }
 }
