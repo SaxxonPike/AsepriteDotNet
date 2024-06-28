@@ -60,6 +60,29 @@ internal sealed class AsepriteBinaryReader : IDisposable
     }
 
     /// <summary>
+    /// Reads the next signed byte from the underlying stream and advances the stream by one byte.
+    /// </summary>
+    /// <returns>The next signed byte read from the underlying stream.</returns>
+    /// <exception cref="ObjectDisposedException">
+    /// Thrown if this instance of the <see cref="AsepriteBinaryReader"/> class, or the underlying stream, has been
+    /// disposed of prior to calling this method.
+    /// </exception>
+    /// <exception cref="EndOfStreamException">
+    /// Thrown if the end of stream was reached when attempting to read.
+    /// </exception>
+    public sbyte ReadSbyte()
+    {
+        ValidateDisposed(_isDisposed);
+
+        int b = _stream.ReadByte();
+        if (b < 0)
+        {
+            throw new EndOfStreamException("The end of stream was reached");
+        }
+        return unchecked((sbyte)b);
+    }
+
+    /// <summary>
     /// Reads the specified number of bytes from the underlying stream and advances the stream by that number of bytes.
     /// </summary>
     /// <param name="count">The number of bytes to read from the underlying stream</param>

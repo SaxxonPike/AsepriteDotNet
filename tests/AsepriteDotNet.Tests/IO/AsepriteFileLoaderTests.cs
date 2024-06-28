@@ -465,25 +465,68 @@ namespace AsepriteDotNet.Tests.IO
         {
             string path = GetPath("tag-data-test.aseprite");
             AsepriteFile aseFile = AsepriteFileLoader.FromFile(path);
-            AsepriteUserDataPropertyMap actual = aseFile.UserData.PropertyMaps[0];
 
-            Assert.Equal("a", actual.Properties[0].Key);
-            Assert.Equal(true, actual.Properties[0].Value);
+            var expected = new[]
+            {
+                ("a", (object?)true),
+                ("b", (sbyte)1),
+                ("c", "hi"),
+                ("d", 2.3d),
+                ("m.a", (sbyte)10),
+                ("m.b", "bye"),
+                ("m.c[0]", "a"),
+                ("m.c[1]", "b"),
+                ("m.c[2]", "c"),
+                ("m.d.a", (sbyte)1),
+                ("m.d.b", "d"),
+                ("m.d.c.x", (sbyte)2),
+                ("m.d.c.y", 0.5d),
+                ("m.d.c.z", (sbyte)0),
+                ("m.e", new Point(32, 20)),
+                ("m.f", new Size(40, 80)),
+                ("m.g", new Rectangle(2, 4, 6, 8)),
+                ("u[0]", (sbyte)10),
+                ("u[1]", (sbyte)20),
+                ("u[2]", (sbyte)30),
+                ("v[0]", (sbyte)10),
+                ("v[1]", (sbyte)20),
+                ("v[2]", (sbyte)30),
+            };
 
-            Assert.Equal("b", actual.Properties[1].Key);
-            Assert.Equal((sbyte)1, actual.Properties[1].Value);
+            var propertyMap = aseFile.UserData.PropertyMaps[0];
 
-            Assert.Equal("c", actual.Properties[2].Key);
-            Assert.Equal("hi", actual.Properties[2].Value);
+            Assert.Equal(true, propertyMap["a"]?.Value);
+            Assert.Equal((sbyte)1, propertyMap["b"]?.Value);
+            Assert.Equal("hi", propertyMap["c"]?.Value);
+            Assert.Equal(2.3d, propertyMap["d"]?.Value);
+            Assert.Equal((sbyte)10, propertyMap["m"]?["a"]?.Value);
+            Assert.Equal("bye", propertyMap["m"]?["b"]?.Value);
+            Assert.Equal("bye", propertyMap["m"]?["c"]?[0]);
 
-            Assert.Equal("d", actual.Properties[3].Key);
-            Assert.Equal(2.3d, actual.Properties[3].Value);
+            var actual = FlattenPropertyMap(string.Empty, propertyMap).ToArray();
+            Assert.Equal(expected, actual);
 
-            Assert.Equal("m", actual.Properties[4].Key);
+            return;
 
-            Assert.Equal("u", actual.Properties[5].Key);
+            // Flattens an array (vector) to bracketed indices.
+            IEnumerable<(string, object?)> FlattenVector(string propPath, IEnumerable<object> objects) =>
+                objects.SelectMany((obj, i) =>
+                    obj switch
+                    {
+                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}[{i}].", propMap),
+                        object[] vector => FlattenVector($"{propPath}[{i}]", vector),
+                        _ => [($"{propPath}[{i}]", obj)]
+                    });
 
-            Assert.Equal("v", actual.Properties[6].Key);
+            // Flattens a property map to dotted names.
+            IEnumerable<(string, object?)> FlattenPropertyMap(string propPath, IEnumerable<AsepriteUserDataProperty> properties) =>
+                properties.SelectMany(p =>
+                    p.Value switch
+                    {
+                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}{p.Key}.", propMap),
+                        object[] vector => FlattenVector($"{propPath}{p.Key}", vector),
+                        _ => [($"{propPath}{p.Key}", p.Value)]
+                    });
         }
     }
 }

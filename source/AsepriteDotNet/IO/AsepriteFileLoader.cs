@@ -62,7 +62,7 @@ public static partial class AsepriteFileLoader
             case ASE_USER_DATA_PROPERTY_TYPE_BOOL:
                 return reader.ReadByte() != 0;
             case ASE_USER_DATA_PROPERTY_TYPE_INT8:
-                return unchecked((sbyte)reader.ReadByte());
+                return reader.ReadSbyte();
             case ASE_USER_DATA_PROPERTY_TYPE_UINT8:
                 return reader.ReadByte();
             case ASE_USER_DATA_PROPERTY_TYPE_INT16:
@@ -127,7 +127,7 @@ public static partial class AsepriteFileLoader
             var name = reader.ReadString();
             var type = reader.ReadWord();
             var value = ReadUserDataPropertyValue(reader, type);
-            properties.Add(new AsepriteUserDataProperty(name, value));
+            properties.Add(new AsepriteUserDataProperty(name, (AsepriteUserDataPropertyType)type, value));
         }
 
         return new AsepriteUserDataPropertyMap(key, properties.ToArray());

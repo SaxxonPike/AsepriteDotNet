@@ -8,7 +8,7 @@ namespace AsepriteDotNet.Aseprite.Types;
 /// Defines a key/value pair within a property map in an Aseprite file.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class AsepriteUserDataProperty : IEquatable<AsepriteUserDataProperty>
+public sealed class AsepriteUserDataProperty
 {
     /// <summary>
     /// Name of the property.
@@ -16,33 +16,31 @@ public sealed class AsepriteUserDataProperty : IEquatable<AsepriteUserDataProper
     public string Key { get; }
 
     /// <summary>
+    /// Type of value stored in <see cref="Value"/>.
+    /// </summary>
+    public AsepriteUserDataPropertyType Type { get; }
+
+    /// <summary>
     /// Value of the property.
     /// </summary>
     public object? Value { get; }
 
-    internal AsepriteUserDataProperty(string key, object? value) =>
-        (Key, Value) = (key, value);
+    /// <summary>
+    /// If the value is a property map, attempts to get the property with the specified key.
+    /// </summary>
+    public AsepriteUserDataProperty? this[string key] =>
+        Value is AsepriteUserDataPropertyMap map
+            ? map[key]
+            : default;
 
-    /// <inheritdoc />
-    public bool Equals(AsepriteUserDataProperty? other)
-    {
-        return other is not null &&
-               (ReferenceEquals(this, other) ||
-                Key == other.Key &&
-                Equals(Value, other.Value));
-    }
+    /// <summary>
+    /// If the value is an array (vector), attempts to get the element at the specified index.
+    /// </summary>
+    public object? this[int index] =>
+        index >= 0 && Value is object?[] vector && index < vector.Length
+            ? vector[index]
+            : default;
 
-    /// <inheritdoc />
-    public override bool Equals(object? obj)
-    {
-        return ReferenceEquals(this, obj) ||
-               obj is AsepriteUserDataProperty other &&
-               Equals(other);
-    }
-
-    /// <inheritdoc />
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(Key, Value);
-    }
+    internal AsepriteUserDataProperty(string key, AsepriteUserDataPropertyType type, object? value) =>
+        (Key, Type, Value) = (key, type, value);
 }

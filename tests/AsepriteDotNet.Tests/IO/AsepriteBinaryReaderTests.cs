@@ -35,6 +35,8 @@ namespace AsepriteDotNet.Tests.IO
         {
             ValidateEndOfStreamException(writer => writer.Write(byte.MinValue), reader => reader.ReadByte());
             ValidateEndOfStreamException(writer => writer.Write(byte.MaxValue), reader => reader.ReadByte());
+            ValidateEndOfStreamException(writer => writer.Write(sbyte.MinValue), reader => reader.ReadSbyte());
+            ValidateEndOfStreamException(writer => writer.Write(sbyte.MaxValue), reader => reader.ReadSbyte());
             ValidateEndOfStreamException(writer => writer.Write(ushort.MinValue), reader => reader.ReadWord());
             ValidateEndOfStreamException(writer => writer.Write(ushort.MaxValue), reader => reader.ReadWord());
             ValidateEndOfStreamException(writer => writer.Write(short.MinValue), reader => reader.ReadShort());
@@ -96,6 +98,13 @@ namespace AsepriteDotNet.Tests.IO
         {
             ValidateRead(writer => writer.Write(byte.MinValue), reader => reader.ReadByte(), byte.MinValue);
             ValidateRead(writer => writer.Write(byte.MaxValue), reader => reader.ReadByte(), byte.MaxValue);
+        }
+
+        [Fact]
+        public void AsepriteBinaryReader_ReadSbyte()
+        {
+            ValidateRead(writer => writer.Write(sbyte.MinValue), reader => reader.ReadSbyte(), sbyte.MinValue);
+            ValidateRead(writer => writer.Write(sbyte.MaxValue), reader => reader.ReadSbyte(), sbyte.MaxValue);
         }
 
         [Fact]
@@ -299,11 +308,20 @@ namespace AsepriteDotNet.Tests.IO
         private static void ValidateDisposedExceptions(AsepriteBinaryReader reader)
         {
             Assert.Throws<ObjectDisposedException>(() => reader.ReadByte());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadSbyte());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadBytes(1));
             Assert.Throws<ObjectDisposedException>(() => reader.ReadWord());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadShort());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadDword());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadLong());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadQword());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadLong64());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadFixed());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadFloat());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadDouble());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadPoint());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadRect());
+            Assert.Throws<ObjectDisposedException>(() => reader.ReadSize());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadString());
             Assert.Throws<ObjectDisposedException>(() => reader.ReadString(1));
             Assert.Throws<ObjectDisposedException>(() => reader.ReadUnsafe<int>(sizeof(int)));
