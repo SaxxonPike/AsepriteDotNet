@@ -42,6 +42,7 @@ public sealed class AsepriteUserData
     public ReadOnlySpan<AsepriteUserDataPropertyMap> PropertyMaps
     {
         get => _propertyMaps;
+        internal set => _propertyMaps = value.ToArray();
     }
 
     internal void SetPropertyMaps(AsepriteUserDataPropertyMap[] propertyMaps)

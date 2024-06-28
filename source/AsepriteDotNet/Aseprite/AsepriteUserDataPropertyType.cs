@@ -12,6 +12,11 @@ namespace AsepriteDotNet.Aseprite;
 public enum AsepriteUserDataPropertyType
 {
     /// <summary>
+    /// The value is not present.
+    /// </summary>
+    Null = 0,
+
+    /// <summary>
     /// The value is a boolean.
     /// </summary>
     Boolean = 1,

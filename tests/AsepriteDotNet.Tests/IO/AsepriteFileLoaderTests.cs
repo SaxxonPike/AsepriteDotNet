@@ -495,7 +495,7 @@ namespace AsepriteDotNet.Tests.IO
 
             var propertyMap = aseFile.UserData.PropertyMaps[0];
 
-            var actual = FlattenPropertyMap(string.Empty, propertyMap).ToArray();
+            var actual = FlattenPropertyMap(string.Empty, propertyMap.Properties.ToArray()).ToArray();
             Assert.Equal(expected, actual);
 
             return;
