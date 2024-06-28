@@ -495,14 +495,6 @@ namespace AsepriteDotNet.Tests.IO
 
             var propertyMap = aseFile.UserData.PropertyMaps[0];
 
-            Assert.Equal(true, propertyMap["a"]?.Value);
-            Assert.Equal((sbyte)1, propertyMap["b"]?.Value);
-            Assert.Equal("hi", propertyMap["c"]?.Value);
-            Assert.Equal(2.3d, propertyMap["d"]?.Value);
-            Assert.Equal((sbyte)10, propertyMap["m"]?["a"]?.Value);
-            Assert.Equal("bye", propertyMap["m"]?["b"]?.Value);
-            Assert.Equal("bye", propertyMap["m"]?["c"]?[0]);
-
             var actual = FlattenPropertyMap(string.Empty, propertyMap).ToArray();
             Assert.Equal(expected, actual);
 
@@ -513,7 +505,7 @@ namespace AsepriteDotNet.Tests.IO
                 objects.SelectMany((obj, i) =>
                     obj switch
                     {
-                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}[{i}].", propMap),
+                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}[{i}].", propMap.Properties.ToArray()),
                         object[] vector => FlattenVector($"{propPath}[{i}]", vector),
                         _ => [($"{propPath}[{i}]", obj)]
                     });
@@ -523,7 +515,7 @@ namespace AsepriteDotNet.Tests.IO
                 properties.SelectMany(p =>
                     p.Value switch
                     {
-                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}{p.Key}.", propMap),
+                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}{p.Key}.", propMap.Properties.ToArray()),
                         object[] vector => FlattenVector($"{propPath}{p.Key}", vector),
                         _ => [($"{propPath}{p.Key}", p.Value)]
                     });

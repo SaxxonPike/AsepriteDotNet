@@ -2,6 +2,8 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
+using System.Collections;
+
 namespace AsepriteDotNet.Aseprite.Types;
 
 /// <summary>
@@ -16,7 +18,7 @@ public sealed class AsepriteUserDataProperty
     public string Key { get; }
 
     /// <summary>
-    /// Type of value stored in <see cref="Value"/>.
+    /// Original data type loaded from the file.
     /// </summary>
     public AsepriteUserDataPropertyType Type { get; }
 
@@ -24,22 +26,6 @@ public sealed class AsepriteUserDataProperty
     /// Value of the property.
     /// </summary>
     public object? Value { get; }
-
-    /// <summary>
-    /// If the value is a property map, attempts to get the property with the specified key.
-    /// </summary>
-    public AsepriteUserDataProperty? this[string key] =>
-        Value is AsepriteUserDataPropertyMap map
-            ? map[key]
-            : default;
-
-    /// <summary>
-    /// If the value is an array (vector), attempts to get the element at the specified index.
-    /// </summary>
-    public object? this[int index] =>
-        index >= 0 && Value is object?[] vector && index < vector.Length
-            ? vector[index]
-            : default;
 
     internal AsepriteUserDataProperty(string key, AsepriteUserDataPropertyType type, object? value) =>
         (Key, Type, Value) = (key, type, value);

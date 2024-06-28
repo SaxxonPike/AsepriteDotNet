@@ -10,7 +10,7 @@ namespace AsepriteDotNet.Aseprite.Types;
 /// Defines a property map within custom user data in an Aseprite file.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class AsepriteUserDataPropertyMap : IEnumerable<AsepriteUserDataProperty>
+public sealed class AsepriteUserDataPropertyMap
 {
     private readonly AsepriteUserDataProperty[] _properties;
 
@@ -24,20 +24,6 @@ public sealed class AsepriteUserDataPropertyMap : IEnumerable<AsepriteUserDataPr
     /// </summary>
     public ReadOnlySpan<AsepriteUserDataProperty> Properties => _properties;
 
-    /// <summary>
-    /// Retrieves a property by name.
-    /// </summary>
-    public AsepriteUserDataProperty? this[string name] =>
-        _properties.FirstOrDefault(prop => prop.Key == name);
-
     internal AsepriteUserDataPropertyMap(uint id, AsepriteUserDataProperty[] properties) =>
         (ID, _properties) = (id, properties);
-
-    /// <inheritdoc />
-    public IEnumerator<AsepriteUserDataProperty> GetEnumerator() =>
-        _properties.AsEnumerable().GetEnumerator();
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() =>
-        _properties.GetEnumerator();
 }
