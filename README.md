@@ -106,8 +106,11 @@ Tileset tileset = TilesetProcessor.Process(aseFile, tilesetIndex: 0, options);
 //  Use the TilemapProcessor to generate a tilemap from a specified frame in the Aseprite file
 Tilemap tilemap = TilemapProcessor.Process(aseFile frameIndex: 0, options);
 
-//  Use the AnimatedTilemapProcess to generate an animated tilemap from the Aseprite file
+//  Use the AnimatedTilemapProcessor to generate an animated tilemap from the Aseprite file
 AnimatedTilemap animatedTilemap = AnimatedTilemapProcessor.Process(aseFile, options);
+
+//  Use the PropertyMapProcessor to access UserData property maps from the Aseprite file
+PropertyMapProcessor propertyMapProcessor = PropertyMapProcessor.Process(aseFile);
 ```
 
 # License
