@@ -2,17 +2,15 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using System.Collections;
-
 namespace AsepriteDotNet.Aseprite.Types;
 
 /// <summary>
 /// Defines a property map within custom user data in an Aseprite file.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class AsepriteUserDataPropertyMap
+public sealed class AsepritePropertyMap
 {
-    private readonly AsepriteUserDataProperty[] _properties;
+    private readonly ReadOnlyMemory<AsepritePropertyMapEntry> _entries;
 
     /// <summary>
     /// ID of the property map.
@@ -22,8 +20,8 @@ public sealed class AsepriteUserDataPropertyMap
     /// <summary>
     /// Key/value pairs in the property map.
     /// </summary>
-    public ReadOnlySpan<AsepriteUserDataProperty> Properties => _properties;
+    public ReadOnlySpan<AsepritePropertyMapEntry> Entries => _entries.Span;
 
-    internal AsepriteUserDataPropertyMap(uint id, AsepriteUserDataProperty[] properties) =>
-        (ID, _properties) = (id, properties);
+    internal AsepritePropertyMap(uint id, ReadOnlyMemory<AsepritePropertyMapEntry> entries) =>
+        (ID, _entries) = (id, entries);
 }

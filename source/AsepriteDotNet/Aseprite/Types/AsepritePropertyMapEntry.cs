@@ -10,7 +10,7 @@ namespace AsepriteDotNet.Aseprite.Types;
 /// Defines a key/value pair within a property map in an Aseprite file.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class AsepriteUserDataProperty
+public sealed class AsepritePropertyMapEntry
 {
     /// <summary>
     /// Name of the property.
@@ -20,13 +20,13 @@ public sealed class AsepriteUserDataProperty
     /// <summary>
     /// Original data type loaded from the file.
     /// </summary>
-    public AsepriteUserDataPropertyType Type { get; }
+    public AsepritePropertyType Type { get; }
 
     /// <summary>
     /// Value of the property.
     /// </summary>
     public object? Value { get; }
 
-    internal AsepriteUserDataProperty(string key, AsepriteUserDataPropertyType type, object? value) =>
+    internal AsepritePropertyMapEntry(string key, AsepritePropertyType type, object? value) =>
         (Key, Type, Value) = (key, type, value);
 }

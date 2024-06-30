@@ -2,14 +2,12 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using AsepriteDotNet.Aseprite.Types;
-
 namespace AsepriteDotNet.Aseprite;
 
 /// <summary>
 /// Determines the type of value stored in a user data property.
 /// </summary>
-public enum AsepriteUserDataPropertyType
+public enum AsepritePropertyType
 {
     /// <summary>
     /// The value is not present.

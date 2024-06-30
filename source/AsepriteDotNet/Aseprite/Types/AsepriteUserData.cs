@@ -12,8 +12,6 @@ namespace AsepriteDotNet.Aseprite.Types;
 /// </summary>
 public sealed class AsepriteUserData
 {
-    private AsepriteUserDataPropertyMap[] _propertyMaps;
-
     /// <summary>
     /// Gets a value that indicates whether this user data contains a value for the <see cref="Text"/> property.
     /// </summary>
@@ -39,21 +37,14 @@ public sealed class AsepriteUserData
     /// <summary>
     /// Gets the property map data that was set for this user data in Aseprite.
     /// </summary>
-    public ReadOnlySpan<AsepriteUserDataPropertyMap> PropertyMaps
-    {
-        get => _propertyMaps;
-        internal set => _propertyMaps = value.ToArray();
-    }
+    public ReadOnlySpan<AsepritePropertyMap> PropertyMaps => PropertyMapData.Span;
 
-    internal void SetPropertyMaps(AsepriteUserDataPropertyMap[] propertyMaps)
-    {
-        _propertyMaps = propertyMaps;
-    }
+    internal ReadOnlyMemory<AsepritePropertyMap> PropertyMapData { get; set; }
 
     internal AsepriteUserData()
     {
         Text = null;
         Color = null;
-        _propertyMaps = Array.Empty<AsepriteUserDataPropertyMap>();
+        PropertyMapData = ReadOnlyMemory<AsepritePropertyMap>.Empty;
     }
 }

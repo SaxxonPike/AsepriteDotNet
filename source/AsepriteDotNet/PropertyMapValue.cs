@@ -8,9 +8,9 @@ namespace AsepriteDotNet;
 /// Represents a single key/value pair in a property map.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class PropertyMapValue
+public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
 {
-    private readonly PropertyMapValue[]? _children;
+    private readonly PropertyMapValue[] _children;
 
     /// <summary>
     /// Key of the key/value pair.
@@ -65,8 +65,26 @@ public sealed class PropertyMapValue
     /// Thrown if the specified index is out of range of nested values.
     /// </exception>
     public PropertyMapValue this[int index] =>
-        (_children ?? Array.Empty<PropertyMapValue>()) [index];
+        (_children ?? Array.Empty<PropertyMapValue>())[index];
 
-    internal PropertyMapValue(PropertyMapValue[]? children, string key, object? value) =>
+    internal PropertyMapValue(PropertyMapValue[] children, string key, object? value) =>
         (_children, Key, Value) = (children, key, value);
+
+    /// <inheritdoc />
+    public bool Equals(PropertyMapValue? other) =>
+        other is not null &&
+        (ReferenceEquals(this, other) ||
+         Key == other.Key &&
+         Equals(Value, other.Value) &&
+         _children.SequenceEqual(other._children));
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) =>
+        ReferenceEquals(this, obj) ||
+        obj is PropertyMapValue other
+        && Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() =>
+        HashCode.Combine(Key, Value);
 }

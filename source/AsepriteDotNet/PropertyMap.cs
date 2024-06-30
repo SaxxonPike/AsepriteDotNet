@@ -2,13 +2,15 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
+using System.Collections;
+
 namespace AsepriteDotNet;
 
 /// <summary>
 /// Represents a set of key/value pairs with arbitrary value types.
 /// This class cannot be inherited.
 /// </summary>
-public sealed class PropertyMap
+public sealed class PropertyMap : IEquatable<PropertyMap>
 {
     private readonly PropertyMapValue[] _properties;
 
@@ -54,4 +56,22 @@ public sealed class PropertyMap
 
     internal PropertyMap(uint key, PropertyMapValue[] properties) =>
         (Key, _properties) = (unchecked((int)key), properties);
+
+    /// <inheritdoc />
+    public bool Equals(PropertyMap? other) =>
+        other is not null &&
+        (ReferenceEquals(this, other) ||
+         Key == other.Key &&
+         _properties.Equals(other._properties));
+
+    /// <inheritdoc />
+    public override bool Equals(object? obj) =>
+        ReferenceEquals(this, obj) ||
+        obj is PropertyMap other &&
+        Equals(other);
+
+    /// <inheritdoc />
+    public override int GetHashCode() =>
+        HashCode.Combine(Key, ((IStructuralEquatable) _properties)
+            .GetHashCode(EqualityComparer<PropertyMapValue>.Default));
 }

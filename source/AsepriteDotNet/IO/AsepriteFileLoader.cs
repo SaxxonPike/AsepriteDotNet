@@ -117,9 +117,9 @@ public static partial class AsepriteFileLoader
         }
     }
 
-    private static AsepriteUserDataPropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader, uint key)
+    private static AsepritePropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader, uint key)
     {
-        var properties = new List<AsepriteUserDataProperty>();
+        var properties = new List<AsepritePropertyMapEntry>();
         var count = (int)reader.ReadDword();
 
         for (var i = 0; i < count; i++)
@@ -127,13 +127,13 @@ public static partial class AsepriteFileLoader
             var name = reader.ReadString();
             var type = reader.ReadWord();
             var value = ReadUserDataPropertyValue(reader, type);
-            properties.Add(new AsepriteUserDataProperty(name, (AsepriteUserDataPropertyType)type, value));
+            properties.Add(new AsepritePropertyMapEntry(name, (AsepritePropertyType)type, value));
         }
 
-        return new AsepriteUserDataPropertyMap(key, properties.ToArray());
+        return new AsepritePropertyMap(key, properties.ToArray());
     }
 
-    private static AsepriteUserDataPropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader)
+    private static AsepritePropertyMap ReadUserDataPropertyMap(AsepriteBinaryReader reader)
     {
         var key = reader.ReadDword();
         return ReadUserDataPropertyMap(reader, key);
@@ -244,7 +244,7 @@ public static partial class AsepriteFileLoader
                         uint flags = reader.ReadDword();
                         string? text = null;
                         Rgba32? color = null;
-                        AsepriteUserDataPropertyMap[] propertyMaps = Array.Empty<AsepriteUserDataPropertyMap>();
+                        AsepritePropertyMap[] propertyMaps = Array.Empty<AsepritePropertyMap>();
 
                         if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_TEXT))
                         {
@@ -262,7 +262,7 @@ public static partial class AsepriteFileLoader
                             reader.ReadDword();
 
                             var propertyMapCount = (int)reader.ReadDword();
-                            propertyMaps = new AsepriteUserDataPropertyMap[propertyMapCount];
+                            propertyMaps = new AsepritePropertyMap[propertyMapCount];
 
                             for (var j = 0; j < propertyMapCount; j++)
                             {
@@ -274,7 +274,7 @@ public static partial class AsepriteFileLoader
                         {
                             currentUserData.Text = text;
                             currentUserData.Color = color;
-                            currentUserData.SetPropertyMaps(propertyMaps);
+                            currentUserData.PropertyMapData = propertyMaps;
 
                             if (lastReadChunkType == ASE_CHUNK_TAGS)
                             {
@@ -592,7 +592,7 @@ public static partial class AsepriteFileLoader
                             uint flags = reader.ReadDword();
                             string? text = null;
                             Rgba32? color = null;
-                            AsepriteUserDataPropertyMap[] propertyMaps = Array.Empty<AsepriteUserDataPropertyMap>();
+                            AsepritePropertyMap[] propertyMaps = Array.Empty<AsepritePropertyMap>();
 
                             if (Calc.HasFlag(flags, ASE_USER_DATA_FLAG_HAS_TEXT))
                             {
@@ -610,7 +610,7 @@ public static partial class AsepriteFileLoader
                                 reader.ReadDword();
 
                                 var propertyMapCount = (int)reader.ReadDword();
-                                propertyMaps = new AsepriteUserDataPropertyMap[propertyMapCount];
+                                propertyMaps = new AsepritePropertyMap[propertyMapCount];
 
                                 for (var j = 0; j < propertyMapCount; j++)
                                 {
@@ -622,13 +622,13 @@ public static partial class AsepriteFileLoader
                             {
                                 spriteUserData.Text = text;
                                 spriteUserData.Color = color;
-                                spriteUserData.SetPropertyMaps(propertyMaps);
+                                spriteUserData.PropertyMapData = propertyMaps;
                             }
                             else if (currentUserData is not null)
                             {
                                 currentUserData.Text = text;
                                 currentUserData.Color = color;
-                                currentUserData.SetPropertyMaps(propertyMaps);
+                                currentUserData.PropertyMapData = propertyMaps;
 
                                 if (lastReadChunkType == ASE_CHUNK_TAGS)
                                 {

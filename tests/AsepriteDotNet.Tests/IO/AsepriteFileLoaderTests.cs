@@ -495,7 +495,7 @@ namespace AsepriteDotNet.Tests.IO
 
             var propertyMap = aseFile.UserData.PropertyMaps[0];
 
-            var actual = FlattenPropertyMap(string.Empty, propertyMap.Properties.ToArray()).ToArray();
+            var actual = FlattenPropertyMap(string.Empty, propertyMap.Entries.ToArray()).ToArray();
             Assert.Equal(expected, actual);
 
             return;
@@ -505,17 +505,17 @@ namespace AsepriteDotNet.Tests.IO
                 objects.SelectMany((obj, i) =>
                     obj switch
                     {
-                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}[{i}].", propMap.Properties.ToArray()),
+                        AsepritePropertyMap propMap => FlattenPropertyMap($"{propPath}[{i}].", propMap.Entries.ToArray()),
                         object[] vector => FlattenVector($"{propPath}[{i}]", vector),
                         _ => [($"{propPath}[{i}]", obj)]
                     });
 
             // Flattens a property map to dotted names.
-            IEnumerable<(string, object?)> FlattenPropertyMap(string propPath, IEnumerable<AsepriteUserDataProperty> properties) =>
+            IEnumerable<(string, object?)> FlattenPropertyMap(string propPath, IEnumerable<AsepritePropertyMapEntry> properties) =>
                 properties.SelectMany(p =>
                     p.Value switch
                     {
-                        AsepriteUserDataPropertyMap propMap => FlattenPropertyMap($"{propPath}{p.Key}.", propMap.Properties.ToArray()),
+                        AsepritePropertyMap propMap => FlattenPropertyMap($"{propPath}{p.Key}.", propMap.Entries.ToArray()),
                         object[] vector => FlattenVector($"{propPath}{p.Key}", vector),
                         _ => [($"{propPath}{p.Key}", p.Value)]
                     });

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
+using System.Runtime.InteropServices;
 using AsepriteDotNet.Aseprite;
 using AsepriteDotNet.Aseprite.Types;
 
@@ -52,9 +53,9 @@ public static class PropertyMapProcessor
                 break;
 
             // Nested property maps are traversed:
-            case AsepriteUserDataPropertyMap mapVal:
+            case AsepritePropertyMap mapVal:
                 value = mapVal;
-                children = Process(mapVal.Properties);
+                children = Process(mapVal.Entries);
                 break;
 
             // Other values are left untouched:
@@ -63,10 +64,10 @@ public static class PropertyMapProcessor
                 break;
         }
 
-        return new PropertyMapValue(children, key, value);
+        return new PropertyMapValue(children ?? Array.Empty<PropertyMapValue>(), key, value);
     }
 
-    internal static PropertyMapValue[] Process(ReadOnlySpan<AsepriteUserDataProperty> properties)
+    internal static PropertyMapValue[] Process(ReadOnlySpan<AsepritePropertyMapEntry> properties)
     {
         var result = new List<PropertyMapValue>();
 
@@ -81,11 +82,11 @@ public static class PropertyMapProcessor
         return result.ToArray();
     }
 
-    public static PropertyMap Process(AsepriteUserDataPropertyMap propertyMap)
+    public static PropertyMap Process(AsepritePropertyMap propertyMap)
     {
         ArgumentNullException.ThrowIfNull(propertyMap);
 
-        var values = Process(propertyMap.Properties);
+        var values = Process(propertyMap.Entries);
         return new PropertyMap(propertyMap.ID, values);
     }
 

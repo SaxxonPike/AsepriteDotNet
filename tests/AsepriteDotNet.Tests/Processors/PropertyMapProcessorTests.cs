@@ -29,38 +29,41 @@ public sealed class PropertyMapProcessorTestFixture
 
     public Guid Guid { get; } = Guid.NewGuid();
 
-    private AsepriteUserDataPropertyMap CreateTestPropertyMap(int vendorId, string id) =>
-        new(unchecked((uint)vendorId), [
-            new AsepriteUserDataProperty("id", AsepriteUserDataPropertyType.String, id),
-            new AsepriteUserDataProperty("sbyte", AsepriteUserDataPropertyType.SByte, sbyte.MaxValue),
-            new AsepriteUserDataProperty("byte", AsepriteUserDataPropertyType.Byte, byte.MaxValue),
-            new AsepriteUserDataProperty("short", AsepriteUserDataPropertyType.Short, short.MaxValue),
-            new AsepriteUserDataProperty("ushort", AsepriteUserDataPropertyType.UShort, ushort.MaxValue),
-            new AsepriteUserDataProperty("int", AsepriteUserDataPropertyType.Int, int.MaxValue),
-            new AsepriteUserDataProperty("uint", AsepriteUserDataPropertyType.UInt, uint.MaxValue),
-            new AsepriteUserDataProperty("long", AsepriteUserDataPropertyType.Long, long.MaxValue),
-            new AsepriteUserDataProperty("ulong", AsepriteUserDataPropertyType.ULong, ulong.MaxValue),
-            new AsepriteUserDataProperty("string", AsepriteUserDataPropertyType.String, "hello"),
-            new AsepriteUserDataProperty("fixed", AsepriteUserDataPropertyType.Fixed, int.MaxValue / 65536.0f),
-            new AsepriteUserDataProperty("float", AsepriteUserDataPropertyType.Float, float.MaxValue),
-            new AsepriteUserDataProperty("double", AsepriteUserDataPropertyType.Double, double.MaxValue),
-            new AsepriteUserDataProperty("point", AsepriteUserDataPropertyType.Point,
+    private AsepritePropertyMap CreateTestPropertyMap(int vendorId, string id) =>
+        new(unchecked((uint)vendorId), new[]
+        {
+            new AsepritePropertyMapEntry("id", AsepritePropertyType.String, id),
+            new AsepritePropertyMapEntry("sbyte", AsepritePropertyType.SByte, sbyte.MaxValue),
+            new AsepritePropertyMapEntry("byte", AsepritePropertyType.Byte, byte.MaxValue),
+            new AsepritePropertyMapEntry("short", AsepritePropertyType.Short, short.MaxValue),
+            new AsepritePropertyMapEntry("ushort", AsepritePropertyType.UShort, ushort.MaxValue),
+            new AsepritePropertyMapEntry("int", AsepritePropertyType.Int, int.MaxValue),
+            new AsepritePropertyMapEntry("uint", AsepritePropertyType.UInt, uint.MaxValue),
+            new AsepritePropertyMapEntry("long", AsepritePropertyType.Long, long.MaxValue),
+            new AsepritePropertyMapEntry("ulong", AsepritePropertyType.ULong, ulong.MaxValue),
+            new AsepritePropertyMapEntry("string", AsepritePropertyType.String, "hello"),
+            new AsepritePropertyMapEntry("fixed", AsepritePropertyType.Fixed, int.MaxValue / 65536.0f),
+            new AsepritePropertyMapEntry("float", AsepritePropertyType.Float, float.MaxValue),
+            new AsepritePropertyMapEntry("double", AsepritePropertyType.Double, double.MaxValue),
+            new AsepritePropertyMapEntry("point", AsepritePropertyType.Point,
                 new Point(int.MinValue, int.MaxValue)),
-            new AsepriteUserDataProperty("size", AsepriteUserDataPropertyType.Size,
+            new AsepritePropertyMapEntry("size", AsepritePropertyType.Size,
                 new Size(int.MinValue, int.MaxValue)),
-            new AsepriteUserDataProperty("rect", AsepriteUserDataPropertyType.Rectangle,
+            new AsepritePropertyMapEntry("rect", AsepritePropertyType.Rectangle,
                 new Rectangle(int.MinValue, int.MaxValue, int.MaxValue, int.MinValue)),
-            new AsepriteUserDataProperty("vector", AsepriteUserDataPropertyType.Vector,
+            new AsepritePropertyMapEntry("vector", AsepritePropertyType.Vector,
                 new object?[] { "greetings", int.MaxValue }),
-            new AsepriteUserDataProperty("props", AsepriteUserDataPropertyType.Properties,
-                new AsepriteUserDataPropertyMap(0, [
-                    new AsepriteUserDataProperty("howdy", AsepriteUserDataPropertyType.String, "hiya"),
-                    new AsepriteUserDataProperty("bye", AsepriteUserDataPropertyType.Int, int.MaxValue)
-                ])),
-            new AsepriteUserDataProperty("uuid", AsepriteUserDataPropertyType.Guid, Guid)
-        ]);
+            new AsepritePropertyMapEntry("props", AsepritePropertyType.Properties,
+                new AsepritePropertyMap(0,
+                    new[]
+                    {
+                        new AsepritePropertyMapEntry("howdy", AsepritePropertyType.String, "hiya"),
+                        new AsepritePropertyMapEntry("bye", AsepritePropertyType.Int, int.MaxValue)
+                    })),
+            new AsepritePropertyMapEntry("uuid", AsepritePropertyType.Guid, Guid)
+        });
 
-    private AsepriteUserDataPropertyMap[] CreateTestPropertyMaps(int vendorId, string id) =>
+    private AsepritePropertyMap[] CreateTestPropertyMaps(int vendorId, string id) =>
     [
         CreateTestPropertyMap(0, id),
         CreateTestPropertyMap(vendorId, id)
@@ -76,13 +79,13 @@ public sealed class PropertyMapProcessorTestFixture
 
         AsepriteLayer = new AsepriteImageLayer(
             new AsepriteLayerProperties(),
-            "test-layer") { UserData = { PropertyMaps = CreateTestPropertyMaps(LayerExtensionId, "layer") } };
+            "test-layer") { UserData = { PropertyMapData = CreateTestPropertyMaps(LayerExtensionId, "layer") } };
 
         AsepriteCel = new AsepriteImageCel(
             new AsepriteCelProperties(),
             AsepriteLayer,
             new AsepriteImageCelProperties(),
-            pixels) { UserData = { PropertyMaps = CreateTestPropertyMaps(CelExtensionId, "cel") } };
+            pixels) { UserData = { PropertyMapData = CreateTestPropertyMaps(CelExtensionId, "cel") } };
 
         var frame = new AsepriteFrame(
             "test-frame",
@@ -93,17 +96,17 @@ public sealed class PropertyMapProcessorTestFixture
 
         AsepriteTag = new AsepriteTag(
             new AsepriteTagProperties(),
-            "test-tag") { UserData = { PropertyMaps = CreateTestPropertyMaps(TagExtensionId, "tag") } };
+            "test-tag") { UserData = { PropertyMapData = CreateTestPropertyMaps(TagExtensionId, "tag") } };
 
         AsepriteSlice = new AsepriteSlice(
             "test-slice",
             false,
             false,
-            []) { UserData = { PropertyMaps = CreateTestPropertyMaps(SliceExtensionId, "slice") } };
+            []) { UserData = { PropertyMapData = CreateTestPropertyMaps(SliceExtensionId, "slice") } };
 
         AsepriteUserData = new AsepriteUserData
         {
-            PropertyMaps = CreateTestPropertyMaps(UserDataExtensionId, "userdata")
+            PropertyMapData = CreateTestPropertyMaps(UserDataExtensionId, "userdata")
         };
 
         AsepriteFile = new AsepriteFile(
@@ -117,7 +120,7 @@ public sealed class PropertyMapProcessorTestFixture
             [AsepriteTag],
             [AsepriteSlice],
             [],
-            new AsepriteUserData { PropertyMaps = CreateTestPropertyMaps(FileExtensionId, "file") },
+            new AsepriteUserData { PropertyMapData = CreateTestPropertyMaps(FileExtensionId, "file") },
             []);
     }
 }
