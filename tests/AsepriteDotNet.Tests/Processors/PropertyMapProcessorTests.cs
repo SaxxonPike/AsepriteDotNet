@@ -19,6 +19,8 @@ public sealed class PropertyMapProcessorTestFixture
     public const int FileExtensionId = 5;
     public const int UserDataExtensionId = 6;
 
+    public const int NumberOfTypes = 20;
+
     public string Name { get; } = "property-map-processor-test";
     public AsepriteFile AsepriteFile { get; }
     public AsepriteCel AsepriteCel { get; }
@@ -27,24 +29,24 @@ public sealed class PropertyMapProcessorTestFixture
     public AsepriteTag AsepriteTag { get; }
     public AsepriteUserData AsepriteUserData { get; }
 
-    public Guid Guid { get; } = Guid.NewGuid();
+    public Guid Uuid { get; } = Guid.NewGuid();
 
     private AsepritePropertyMap CreateTestPropertyMap(int vendorId, string id) =>
         new(unchecked((uint)vendorId), new[]
         {
             new AsepritePropertyMapEntry("id", AsepritePropertyType.String, id),
-            new AsepritePropertyMapEntry("sbyte", AsepritePropertyType.SByte, sbyte.MaxValue),
-            new AsepritePropertyMapEntry("byte", AsepritePropertyType.Byte, byte.MaxValue),
-            new AsepritePropertyMapEntry("short", AsepritePropertyType.Short, short.MaxValue),
-            new AsepritePropertyMapEntry("ushort", AsepritePropertyType.UShort, ushort.MaxValue),
-            new AsepritePropertyMapEntry("int", AsepritePropertyType.Int, int.MaxValue),
-            new AsepritePropertyMapEntry("uint", AsepritePropertyType.UInt, uint.MaxValue),
-            new AsepritePropertyMapEntry("long", AsepritePropertyType.Long, long.MaxValue),
-            new AsepritePropertyMapEntry("ulong", AsepritePropertyType.ULong, ulong.MaxValue),
+            new AsepritePropertyMapEntry("sbyte", AsepritePropertyType.I8, sbyte.MaxValue),
+            new AsepritePropertyMapEntry("byte", AsepritePropertyType.U8, byte.MaxValue),
+            new AsepritePropertyMapEntry("short", AsepritePropertyType.I16, short.MaxValue),
+            new AsepritePropertyMapEntry("ushort", AsepritePropertyType.U16, ushort.MaxValue),
+            new AsepritePropertyMapEntry("int", AsepritePropertyType.I32, int.MaxValue),
+            new AsepritePropertyMapEntry("uint", AsepritePropertyType.U32, uint.MaxValue),
+            new AsepritePropertyMapEntry("long", AsepritePropertyType.I64, long.MaxValue),
+            new AsepritePropertyMapEntry("ulong", AsepritePropertyType.U64, ulong.MaxValue),
             new AsepritePropertyMapEntry("string", AsepritePropertyType.String, "hello"),
             new AsepritePropertyMapEntry("fixed", AsepritePropertyType.Fixed, int.MaxValue / 65536.0f),
-            new AsepritePropertyMapEntry("float", AsepritePropertyType.Float, float.MaxValue),
-            new AsepritePropertyMapEntry("double", AsepritePropertyType.Double, double.MaxValue),
+            new AsepritePropertyMapEntry("float", AsepritePropertyType.F32, float.MaxValue),
+            new AsepritePropertyMapEntry("double", AsepritePropertyType.F64, double.MaxValue),
             new AsepritePropertyMapEntry("point", AsepritePropertyType.Point,
                 new Point(int.MinValue, int.MaxValue)),
             new AsepritePropertyMapEntry("size", AsepritePropertyType.Size,
@@ -58,9 +60,10 @@ public sealed class PropertyMapProcessorTestFixture
                     new[]
                     {
                         new AsepritePropertyMapEntry("howdy", AsepritePropertyType.String, "hiya"),
-                        new AsepritePropertyMapEntry("bye", AsepritePropertyType.Int, int.MaxValue)
+                        new AsepritePropertyMapEntry("bye", AsepritePropertyType.I32, int.MaxValue)
                     })),
-            new AsepritePropertyMapEntry("uuid", AsepritePropertyType.Guid, Guid)
+            new AsepritePropertyMapEntry("uuid", AsepritePropertyType.Uuid, Uuid),
+            new AsepritePropertyMapEntry("bool", AsepritePropertyType.Bool8, true)
         });
 
     private AsepritePropertyMap[] CreateTestPropertyMaps(int vendorId, string id) =>
@@ -125,19 +128,16 @@ public sealed class PropertyMapProcessorTestFixture
     }
 }
 
-public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestFixture>
+public class PropertyMapProcessorTests(PropertyMapProcessorTestFixture fixture)
+    : IClassFixture<PropertyMapProcessorTestFixture>
 {
-    private readonly PropertyMapProcessorTestFixture _fixture;
-
-    public PropertyMapProcessorTests(PropertyMapProcessorTestFixture fixture) => _fixture = fixture;
-
     [Fact]
     public void Process_File_UsesFileUserData()
     {
         const int extension = PropertyMapProcessorTestFixture.FileExtensionId;
         const string id = "file";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteFile, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteFile, extension);
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
@@ -149,7 +149,7 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
         const int extension = PropertyMapProcessorTestFixture.CelExtensionId;
         const string id = "cel";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteCel, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteCel, extension);
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
@@ -161,7 +161,7 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
         const int extension = PropertyMapProcessorTestFixture.LayerExtensionId;
         const string id = "layer";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteLayer, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteLayer, extension);
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
@@ -173,7 +173,7 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
         const int extension = PropertyMapProcessorTestFixture.SliceExtensionId;
         const string id = "slice";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteSlice, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteSlice, extension);
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
@@ -185,7 +185,7 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
         const int extension = PropertyMapProcessorTestFixture.TagExtensionId;
         const string id = "tag";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteTag, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteTag, extension);
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
@@ -194,7 +194,7 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
     [Fact]
     public void Process_UserData_ReturnsEmptyMap_WhenInputIsEmpty()
     {
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteUserData, int.MinValue);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteUserData, int.MinValue);
 
         Assert.Equal(int.MinValue, propertyMap.Key);
         Assert.Equal(0, propertyMap.Properties.Length);
@@ -217,140 +217,146 @@ public class PropertyMapProcessorTests : IClassFixture<PropertyMapProcessorTestF
         const int extension = PropertyMapProcessorTestFixture.UserDataExtensionId;
         const string id = "userdata";
 
-        PropertyMap propertyMap = PropertyMapProcessor.Process(_fixture.AsepriteUserData, extension);
+        PropertyMap propertyMap = PropertyMapProcessor.Process(fixture.AsepriteUserData, extension);
 
         // Sanity checks.
 
         Assert.Equal(extension, propertyMap.Key);
         Assert.Equal(id, propertyMap["id"]?.Value);
-        Assert.Equal(19, propertyMap.Properties.Length);
+        Assert.Equal(PropertyMapProcessorTestFixture.NumberOfTypes, propertyMap.Properties.Length);
 
         // Bad input data assertions.
 
-        Assert.Equal(propertyMap["invalid"]?.Value, null);
+        Assert.Null(propertyMap["invalid"]?.Value);
 
         // Single value assertions.
 
         var sByteProp = propertyMap["sbyte"];
         Assert.Equal(propertyMap[1], sByteProp);
-        Assert.Equal(sByteProp?.Key, "sbyte");
-        Assert.Equal(sByteProp?.HasChildren, false);
-        Assert.Equal(sByteProp?.Value, (int)sbyte.MaxValue);
+        Assert.Equal("sbyte", sByteProp?.Key);
+        Assert.False(sByteProp?.HasChildren);
+        Assert.Equal((int)sbyte.MaxValue, sByteProp?.Value);
 
         var byteProp = propertyMap["byte"];
         Assert.Equal(propertyMap[2], byteProp);
-        Assert.Equal(byteProp?.Key, "byte");
-        Assert.Equal(byteProp?.HasChildren, false);
-        Assert.Equal(byteProp?.Value, (int)byte.MaxValue);
+        Assert.Equal("byte", byteProp?.Key);
+        Assert.False(byteProp?.HasChildren);
+        Assert.Equal((int)byte.MaxValue, byteProp?.Value);
 
         var shortProp = propertyMap["short"];
         Assert.Equal(propertyMap[3], shortProp);
-        Assert.Equal(shortProp?.Key, "short");
-        Assert.Equal(shortProp?.HasChildren, false);
-        Assert.Equal(shortProp?.Value, (int)short.MaxValue);
+        Assert.Equal("short", shortProp?.Key);
+        Assert.False(shortProp?.HasChildren);
+        Assert.Equal((int)short.MaxValue, shortProp?.Value);
 
         var uShortProp = propertyMap["ushort"];
         Assert.Equal(propertyMap[4], uShortProp);
-        Assert.Equal(uShortProp?.Key, "ushort");
-        Assert.Equal(uShortProp?.HasChildren, false);
-        Assert.Equal(uShortProp?.Value, (int)ushort.MaxValue);
+        Assert.Equal("ushort", uShortProp?.Key);
+        Assert.False(uShortProp?.HasChildren);
+        Assert.Equal((int)ushort.MaxValue, uShortProp?.Value);
 
         var intProp = propertyMap["int"];
         Assert.Equal(propertyMap[5], intProp);
-        Assert.Equal(intProp?.Key, "int");
-        Assert.Equal(intProp?.HasChildren, false);
-        Assert.Equal(intProp?.Value, int.MaxValue);
+        Assert.Equal("int", intProp?.Key);
+        Assert.False(intProp?.HasChildren);
+        Assert.Equal(int.MaxValue, intProp?.Value);
 
         var uIntProp = propertyMap["uint"];
         Assert.Equal(propertyMap[6], uIntProp);
-        Assert.Equal(uIntProp?.Key, "uint");
-        Assert.Equal(uIntProp?.HasChildren, false);
-        Assert.Equal(uIntProp?.Value, (long)uint.MaxValue);
+        Assert.Equal("uint", uIntProp?.Key);
+        Assert.False(uIntProp?.HasChildren);
+        Assert.Equal((long)uint.MaxValue, uIntProp?.Value);
 
         var longProp = propertyMap["long"];
         Assert.Equal(propertyMap[7], longProp);
-        Assert.Equal(longProp?.Key, "long");
-        Assert.Equal(longProp?.HasChildren, false);
-        Assert.Equal(longProp?.Value, long.MaxValue);
+        Assert.Equal("long", longProp?.Key);
+        Assert.False(longProp?.HasChildren);
+        Assert.Equal(long.MaxValue, longProp?.Value);
 
         var uLongProp = propertyMap["ulong"];
         Assert.Equal(propertyMap[8], uLongProp);
-        Assert.Equal(uLongProp?.Key, "ulong");
-        Assert.Equal(uLongProp?.HasChildren, false);
-        Assert.Equal(uLongProp?.Value, ulong.MaxValue);
+        Assert.Equal("ulong", uLongProp?.Key);
+        Assert.False(uLongProp?.HasChildren);
+        Assert.Equal(ulong.MaxValue, uLongProp?.Value);
 
         var fixedProp = propertyMap["fixed"];
         Assert.Equal(propertyMap[10], fixedProp);
-        Assert.Equal(fixedProp?.Key, "fixed");
-        Assert.Equal(fixedProp?.HasChildren, false);
-        Assert.Equal(fixedProp?.Value, int.MaxValue / 65536.0f);
+        Assert.Equal("fixed", fixedProp?.Key);
+        Assert.False(fixedProp?.HasChildren);
+        Assert.Equal(int.MaxValue / 65536.0f, fixedProp?.Value);
 
         var floatProp = propertyMap["float"];
         Assert.Equal(propertyMap[11], floatProp);
-        Assert.Equal(floatProp?.Key, "float");
-        Assert.Equal(floatProp?.HasChildren, false);
-        Assert.Equal(floatProp?.Value, float.MaxValue);
+        Assert.Equal("float", floatProp?.Key);
+        Assert.False(floatProp?.HasChildren);
+        Assert.Equal(float.MaxValue, floatProp?.Value);
 
         var doubleProp = propertyMap["double"];
         Assert.Equal(propertyMap[12], doubleProp);
-        Assert.Equal(doubleProp?.Key, "double");
-        Assert.Equal(doubleProp?.HasChildren, false);
-        Assert.Equal(doubleProp?.Value, double.MaxValue);
+        Assert.Equal("double", doubleProp?.Key);
+        Assert.False(doubleProp?.HasChildren);
+        Assert.Equal(double.MaxValue, doubleProp?.Value);
 
         var stringProp = propertyMap["string"];
         Assert.Equal(propertyMap[9], stringProp);
-        Assert.Equal(stringProp?.Key, "string");
-        Assert.Equal(stringProp?.HasChildren, false);
-        Assert.Equal(stringProp?.Value, "hello");
+        Assert.Equal("string", stringProp?.Key);
+        Assert.False(stringProp?.HasChildren);
+        Assert.Equal("hello", stringProp?.Value);
 
         var pointProp = propertyMap["point"];
         Assert.Equal(propertyMap[13], pointProp);
-        Assert.Equal(pointProp?.Key, "point");
-        Assert.Equal(pointProp?.HasChildren, false);
-        Assert.Equal(pointProp?.Value, new Point(int.MinValue, int.MaxValue));
+        Assert.Equal("point", pointProp?.Key);
+        Assert.False(pointProp?.HasChildren);
+        Assert.Equal(new Point(int.MinValue, int.MaxValue), pointProp?.Value);
 
         var sizeProp = propertyMap["size"];
         Assert.Equal(propertyMap[14], sizeProp);
-        Assert.Equal(sizeProp?.Key, "size");
-        Assert.Equal(sizeProp?.HasChildren, false);
-        Assert.Equal(sizeProp?.Value, new Size(int.MinValue, int.MaxValue));
+        Assert.Equal("size", sizeProp?.Key);
+        Assert.False(sizeProp?.HasChildren);
+        Assert.Equal(new Size(int.MinValue, int.MaxValue), sizeProp?.Value);
 
         var rectProp = propertyMap["rect"];
         Assert.Equal(propertyMap[15], rectProp);
-        Assert.Equal(rectProp?.Key, "rect");
-        Assert.Equal(rectProp?.HasChildren, false);
-        Assert.Equal(rectProp?.Value, new Rectangle(int.MinValue, int.MaxValue, int.MaxValue, int.MinValue));
+        Assert.Equal("rect", rectProp?.Key);
+        Assert.False(rectProp?.HasChildren);
+        Assert.Equal(new Rectangle(int.MinValue, int.MaxValue, int.MaxValue, int.MinValue), rectProp?.Value);
 
         var uuidProp = propertyMap["uuid"];
         Assert.Equal(propertyMap[18], uuidProp);
-        Assert.Equal(uuidProp?.Key, "uuid");
-        Assert.Equal(uuidProp?.HasChildren, false);
-        Assert.Equal(uuidProp?.Value, _fixture.Guid);
+        Assert.Equal("uuid", uuidProp?.Key);
+        Assert.False(uuidProp?.HasChildren);
+        Assert.Equal(fixture.Uuid, uuidProp?.Value);
+
+        var boolProp = propertyMap["bool"];
+        Assert.Equal(propertyMap[19], boolProp);
+        Assert.Equal("bool", boolProp?.Key);
+        Assert.False(boolProp?.HasChildren);
+        Assert.Equal(true, boolProp?.Value);
 
         // Vector type assertions.
 
         var vector = propertyMap["vector"]!;
         Assert.Equal(propertyMap[16], vector);
-        Assert.Equal(vector.Key, "vector");
-        Assert.Equal(vector.HasChildren, true);
-        Assert.Equal(vector.Children.Length, 2);
+        Assert.Equal("vector", vector.Key);
+        Assert.True(vector.HasChildren);
+        Assert.Equal(2, vector.Children.Length);
 
-        Assert.Equal(vector[0].Value, "greetings");
-        Assert.Equal(vector[0].HasChildren, false);
-        Assert.Equal(vector[0].Key, string.Empty);
-        Assert.Equal(vector[1].Value, int.MaxValue);
-        Assert.Equal(vector[1].HasChildren, false);
-        Assert.Equal(vector[1].Key, string.Empty);
+        Assert.Equal("greetings", vector[0].Value);
+        Assert.False(vector[0].HasChildren);
+        Assert.Equal(string.Empty, vector[0].Key);
+        Assert.Equal(int.MaxValue, vector[1].Value);
+        Assert.False(vector[1].HasChildren);
+        Assert.Equal(string.Empty, vector[1].Key);
 
         // Property set type assertions.
 
         var nestProps = propertyMap["props"]!;
         Assert.Equal(propertyMap[17], nestProps);
-        Assert.Equal(nestProps.Key, "props");
-        Assert.Equal(nestProps.HasChildren, true);
+        Assert.Equal("props", nestProps.Key);
+        Assert.True(nestProps.HasChildren);
 
-        Assert.Equal(nestProps["howdy"]?.Value, "hiya");
-        Assert.Equal(nestProps["bye"]?.Value, int.MaxValue);
+        Assert.Equal("hiya", nestProps["howdy"]?.Value);
+        Assert.Equal(int.MaxValue, nestProps["bye"]?.Value);
     }
 
     [Fact]

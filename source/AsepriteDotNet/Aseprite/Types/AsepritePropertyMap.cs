@@ -13,7 +13,9 @@ public sealed class AsepritePropertyMap
     private readonly ReadOnlyMemory<AsepritePropertyMapEntry> _entries;
 
     /// <summary>
-    /// ID of the property map.
+    /// ID of the property map. Generic user properties will use a value of
+    /// zero for this, but Aseprite extensions can populate their own data to
+    /// keep it separate.
     /// </summary>
     public uint ID { get; }
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using System.Runtime.InteropServices;
 using AsepriteDotNet.Aseprite;
 using AsepriteDotNet.Aseprite.Types;
 
@@ -18,7 +17,7 @@ public static class PropertyMapProcessor
         if (input == null)
             return null;
 
-        PropertyMapValue[]? children = null;
+        var children = ReadOnlyMemory<PropertyMapValue>.Empty;
         object? value;
 
         switch (input)
@@ -64,22 +63,23 @@ public static class PropertyMapProcessor
                 break;
         }
 
-        return new PropertyMapValue(children ?? Array.Empty<PropertyMapValue>(), key, value);
+        return new PropertyMapValue(children, key, value);
     }
 
-    internal static PropertyMapValue[] Process(ReadOnlySpan<AsepritePropertyMapEntry> properties)
+    private static ReadOnlyMemory<PropertyMapValue> Process(ReadOnlySpan<AsepritePropertyMapEntry> properties)
     {
-        var result = new List<PropertyMapValue>();
+        var result = new PropertyMapValue[properties.Length];
+        var count = 0;
 
         foreach (var property in properties)
         {
             if (Process(property.Key, property.Value) is not { } val)
                 continue;
 
-            result.Add(val);
+            result[count++] = val;
         }
 
-        return result.ToArray();
+        return result.AsMemory(0, count);
     }
 
     public static PropertyMap Process(AsepritePropertyMap propertyMap)

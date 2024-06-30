@@ -10,54 +10,55 @@ namespace AsepriteDotNet.Aseprite;
 public enum AsepritePropertyType
 {
     /// <summary>
-    /// The value is not present.
+    /// The value is not present. The Aseprite documentation says this should
+    /// not be found in any exported file.
     /// </summary>
     Null = 0,
 
     /// <summary>
     /// The value is a boolean.
     /// </summary>
-    Boolean = 1,
+    Bool8 = 1,
 
     /// <summary>
     /// The value is a signed 8-bit integer.
     /// </summary>
-    SByte = 2,
+    I8 = 2,
 
     /// <summary>
     /// The value is an unsigned 8-bit integer.
     /// </summary>
-    Byte = 3,
+    U8 = 3,
 
     /// <summary>
     /// The value is a signed 16-bit integer.
     /// </summary>
-    Short = 4,
+    I16 = 4,
 
     /// <summary>
     /// The value is an unsigned 16-bit integer.
     /// </summary>
-    UShort = 5,
+    U16 = 5,
 
     /// <summary>
     /// The value is a signed 32-bit integer.
     /// </summary>
-    Int = 6,
+    I32 = 6,
 
     /// <summary>
     /// The value is an unsigned 32-bit integer.
     /// </summary>
-    UInt = 7,
+    U32 = 7,
 
     /// <summary>
     /// The value is a signed 64-bit integer.
     /// </summary>
-    Long = 8,
+    I64 = 8,
 
     /// <summary>
     /// The value is an unsigned 64-bit integer.
     /// </summary>
-    ULong = 9,
+    U64 = 9,
 
     /// <summary>
     /// The value is a fixed-point number.
@@ -67,12 +68,12 @@ public enum AsepritePropertyType
     /// <summary>
     /// The value is a 32-bit floating-point number.
     /// </summary>
-    Float = 11,
+    F32 = 11,
 
     /// <summary>
     /// The value is a 64-bit floating-point number.
     /// </summary>
-    Double = 12,
+    F64 = 12,
 
     /// <summary>
     /// The value is a string.
@@ -107,5 +108,5 @@ public enum AsepritePropertyType
     /// <summary>
     /// The value is a unique 128-bit ID.
     /// </summary>
-    Guid = 19
+    Uuid = 19
 }

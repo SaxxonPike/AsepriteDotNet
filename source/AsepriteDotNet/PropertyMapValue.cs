@@ -10,7 +10,7 @@ namespace AsepriteDotNet;
 /// </summary>
 public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
 {
-    private readonly PropertyMapValue[] _children;
+    private readonly ReadOnlyMemory<PropertyMapValue> _children;
 
     /// <summary>
     /// Key of the key/value pair.
@@ -28,7 +28,7 @@ public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
     /// values can be either arrays or nested property maps.
     /// </summary>
     public bool HasChildren =>
-        _children is { Length: > 0 };
+        _children.Span.Length > 0;
 
     /// <summary>
     /// Returns the child key/value pairs that belong to this key/value pair.
@@ -36,7 +36,7 @@ public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
     /// returned (and thus, this will not throw.)
     /// </summary>
     public ReadOnlySpan<PropertyMapValue> Children =>
-        _children ?? ReadOnlySpan<PropertyMapValue>.Empty;
+        _children.Span;
 
     /// <summary>
     /// Retrieves a nested value by key.
@@ -49,8 +49,19 @@ public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
     /// If the key was not found, or no nested values are present, this will
     /// return null.
     /// </returns>
-    public PropertyMapValue? this[string key] =>
-        _children?.FirstOrDefault(p => p.Key == key);
+    public PropertyMapValue? this[string key]
+    {
+        get
+        {
+            foreach (var child in _children.Span)
+            {
+                if (child.Key == key)
+                    return child;
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Retrieves a nested value by index.
@@ -65,9 +76,9 @@ public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
     /// Thrown if the specified index is out of range of nested values.
     /// </exception>
     public PropertyMapValue this[int index] =>
-        (_children ?? Array.Empty<PropertyMapValue>())[index];
+        _children.Span[index];
 
-    internal PropertyMapValue(PropertyMapValue[] children, string key, object? value) =>
+    internal PropertyMapValue(ReadOnlyMemory<PropertyMapValue> children, string key, object? value) =>
         (_children, Key, Value) = (children, key, value);
 
     /// <inheritdoc />
@@ -76,7 +87,7 @@ public sealed class PropertyMapValue : IEquatable<PropertyMapValue>
         (ReferenceEquals(this, other) ||
          Key == other.Key &&
          Equals(Value, other.Value) &&
-         _children.SequenceEqual(other._children));
+         _children.Span.SequenceEqual(other._children.Span));
 
     /// <inheritdoc />
     public override bool Equals(object? obj) =>

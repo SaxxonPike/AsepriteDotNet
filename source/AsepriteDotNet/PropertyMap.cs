@@ -2,8 +2,6 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using System.Collections;
-
 namespace AsepriteDotNet;
 
 /// <summary>
@@ -12,7 +10,7 @@ namespace AsepriteDotNet;
 /// </summary>
 public sealed class PropertyMap : IEquatable<PropertyMap>
 {
-    private readonly PropertyMapValue[] _properties;
+    private readonly ReadOnlyMemory<PropertyMapValue> _properties;
 
     /// <summary>
     /// Unique key associated with the property map.
@@ -24,7 +22,7 @@ public sealed class PropertyMap : IEquatable<PropertyMap>
     /// <summary>
     /// All properties stored in the root level of the property map.
     /// </summary>
-    public ReadOnlySpan<PropertyMapValue> Properties => _properties;
+    public ReadOnlySpan<PropertyMapValue> Properties => _properties.Span;
 
     /// <summary>
     /// Retrieve a property by key.
@@ -36,8 +34,19 @@ public sealed class PropertyMap : IEquatable<PropertyMap>
     /// If the key was found, the corresponding key/value pair found first will
     /// be returned. Otherwise, returns null.
     /// </returns>
-    public PropertyMapValue? this[string key] =>
-        _properties.FirstOrDefault(p => p.Key == key);
+    public PropertyMapValue? this[string key]
+    {
+        get
+        {
+            foreach (var property in _properties.Span)
+            {
+                if (property.Key == key)
+                    return property;
+            }
+
+            return null;
+        }
+    }
 
     /// <summary>
     /// Retrieve a property by index.
@@ -52,9 +61,9 @@ public sealed class PropertyMap : IEquatable<PropertyMap>
     /// Thrown if the given index is out of range.
     /// </exception>
     public PropertyMapValue this[int index] =>
-        _properties[index];
+        _properties.Span[index];
 
-    internal PropertyMap(uint key, PropertyMapValue[] properties) =>
+    internal PropertyMap(uint key, ReadOnlyMemory<PropertyMapValue> properties) =>
         (Key, _properties) = (unchecked((int)key), properties);
 
     /// <inheritdoc />
@@ -62,7 +71,7 @@ public sealed class PropertyMap : IEquatable<PropertyMap>
         other is not null &&
         (ReferenceEquals(this, other) ||
          Key == other.Key &&
-         _properties.Equals(other._properties));
+         _properties.Span.SequenceEqual(other._properties.Span));
 
     /// <inheritdoc />
     public override bool Equals(object? obj) =>
@@ -72,6 +81,5 @@ public sealed class PropertyMap : IEquatable<PropertyMap>
 
     /// <inheritdoc />
     public override int GetHashCode() =>
-        HashCode.Combine(Key, ((IStructuralEquatable) _properties)
-            .GetHashCode(EqualityComparer<PropertyMapValue>.Default));
+        HashCode.Combine(Key, _properties);
 }

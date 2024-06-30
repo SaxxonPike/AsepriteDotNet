@@ -2,7 +2,7 @@
 // Licensed under the MIT license.
 // See LICENSE file in the project root for full license information.
 
-using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AsepriteDotNet.Aseprite.Types;
 
@@ -21,6 +21,13 @@ public sealed class AsepritePropertyMapEntry
     /// Original data type loaded from the file.
     /// </summary>
     public AsepritePropertyType Type { get; }
+
+    /// <summary>
+    /// Returns true only if the property type dictates that a value is
+    /// present (that is, not `Null`.)
+    /// </summary>
+    [MemberNotNullWhen(true, nameof(Value))]
+    public bool HasValue => Type != AsepritePropertyType.Null;
 
     /// <summary>
     /// Value of the property.
